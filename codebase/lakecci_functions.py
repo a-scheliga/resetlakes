@@ -418,12 +418,6 @@ def extract_lake_subset_esa_climate(lakeid: int = None, lakename: str = None,
         Filename of the extracted subset
     """
     from xcube.core.store import new_data_store
-    from esa_climate_toolbox.core import get_op
-    from esa_climate_toolbox.core import list_ecv_datasets
-    from esa_climate_toolbox.core import get_store
-    from esa_climate_toolbox.core import list_datasets
-    from esa_climate_toolbox.ops import plot
-
 
     # Input checks
     if not (bool(lakeid) or bool(lakename)):
@@ -468,6 +462,7 @@ def extract_lake_subset_esa_climate(lakeid: int = None, lakename: str = None,
     bbox = meta_shp.union_all().bounds
 
     # Run extraction from ESA CCI datastore
+    cci_store = new_data_store("esa-cci")
     lakes_ds = cci_store.open_data(
             data_id=data_id,
             variable_names=variables,
@@ -476,6 +471,7 @@ def extract_lake_subset_esa_climate(lakeid: int = None, lakename: str = None,
     )
 
     # Save xr output as .nc
+    lakes_ds.to_netcdf(path_output)
 
     time_elapsed = time() - time_start
     
@@ -499,7 +495,7 @@ def data_extraction(id_and_settings):
     
     try:
         if settings['use_esacci']:
-            fns_ext = extract_lake_subset(lakeid=int(id), 
+            fns_ext = extract_lake_subset_esa_climate(lakeid=int(id), 
                                         variables=settings['variables'],
                                         startdate=settings['startdate'], 
                                         enddate=settings['enddate'],
