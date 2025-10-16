@@ -5,7 +5,7 @@ from codebase.lakecci_functions import data_extraction, find_lakeid
 
 # Define lakes of interest
 # Extract specific lakes by lakeids
-lakeids = [6, 2, 8, 9, 10, 12]
+# lakeids = [6, 2, 8, 9, 10, 12]
 
 # (OR) Extract all lakes
 #import pandas as pd
@@ -13,8 +13,8 @@ lakeids = [6, 2, 8, 9, 10, 12]
 #lakeids = list(lakescci_lut.id)
 
 # (OR) Extract specific lakes by names
-#lakenames = ['Michigan']
-#lakeids = [find_lakeid(lakename) for lakename in lakenames]
+lakenames = ['Michigan']
+lakeids = [find_lakeid(lakename) for lakename in lakenames]
 
 # Set extraction settings
 settings = {'variables': ['lake_surface_water_temperature',
