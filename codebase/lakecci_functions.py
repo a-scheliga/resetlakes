@@ -470,6 +470,7 @@ def extract_lake_subset_esa_climate(lakeid: int = None, lakename: str = None,
             bbox = bbox
     )
 
+    lakes_ds.attrs['history'] = list(lakes_ds.attrs['history'][0])
     # Save xr output as .nc
     lakes_ds.to_netcdf(path_output)
 
