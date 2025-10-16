@@ -8,8 +8,8 @@ from datetime import datetime
 import numpy as np
 import netCDF4 as nc4
 import json
-from scripts import constants as c
-from scripts import ROOT
+from codebase import constants as c
+from codebase import ROOT
 import re
 
 module_path = os.path.abspath(os.path.join('../'))

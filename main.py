@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from multiprocessing import Pool
-from scripts.functions import data_extraction, find_lakeid
+from codebase.lakecci_functions import data_extraction, find_lakeid
 
 # Define lakes of interest
 # Extract specific lakes by lakeids
