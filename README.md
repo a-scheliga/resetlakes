@@ -1,3 +1,7 @@
+Built off of [LakeCREST repo](https://github.com/elisaca/LakeCREST) built by [mibrechb](https://github.com/mibrechb) and [elisaca](https://github.com/elisaca).
+
+Inherited README:
+
 # CCI Lakes Extractor (LakeCREST)
 This repository contains a python-based tool to extract lake subsets from the global [ESA CCI Lakes](https://catalogue.ceda.ac.uk/uuid/a07deacaffb8453e93d57ee214676304) dataset based on the code from the [LakeCREST](https://climate.esa.int/en/esa-climate/esa-cci/Fellowships/esa-cci-research-fellowship-elisa-calamita/) project.
 
