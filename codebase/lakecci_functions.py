@@ -436,7 +436,7 @@ def extract_lake_subset_esa_climate(lakeid: int = None, lakename: str = None,
 
     if verbose:
         print(f'Extracting {variables} for Lake {lakename} (ID{lakeid}) from '
-              f'{startdate} to {enddate} from ESA CCI DataStore...')
+              f'{startdate} to {enddate} from ESA CCI DataStore..')
 
 
     # Define output path
@@ -471,6 +471,8 @@ def extract_lake_subset_esa_climate(lakeid: int = None, lakename: str = None,
     )
 
     lakes_ds.attrs['history'] = list(lakes_ds.attrs['history'][0])
+    print(lakes_ds.attrs['history'])
+    print(type(lakes_ds.attrs))
     # Save xr output as .nc
     lakes_ds.to_netcdf(path_output)
 
