@@ -4,6 +4,7 @@ import os
 import sys
 from time import time
 import pandas as pd
+import geopandas as gpd
 from datetime import datetime
 import numpy as np
 import netCDF4 as nc4
@@ -39,11 +40,11 @@ def find_lakeid(lakename: str):
     """Return id corresponding to specified lakename from local-table, revert to web-table or manual input if not available."""
     path_table = ROOT.joinpath(c.PATH_AUXILIARY).joinpath(c.FN_TABLE)
     if path_table.exists():
-        df = pd.read_csv(path_table)
+        df = pd.read_csv(path_table,**c.FN_TABLE_KWARGS)
     else:
         print('Local lake table not found, trying to use CCI Lakes webtable.')
         try:
-            df = pd.read_csv(c.URL_TABLE)
+            df = pd.read_csv(c.URL_TABLE,**c.FN_TABLE_KWARGS)
         except:
             lakeid = input('Not able to reach CCI Lakes webtable, '  \
                            f'please enter the lake ID for Lake {lakename} manually: ')
@@ -66,10 +67,10 @@ def find_lakename(lakeid: int):
     """Return lakename corresponding to specified lakeid from local-table, revert to web-table or manual input if not available."""
     path_table = ROOT.joinpath(c.PATH_AUXILIARY).joinpath(c.FN_TABLE)
     if path_table.is_file():
-        df = pd.read_csv(path_table)
+        df = pd.read_csv(path_table, **c.FN_TABLE_KWARGS)
     else:
         try:
-            df = pd.read_csv(c.URL_TABLE)
+            df = pd.read_csv(c.URL_TABLE**c.FN_TABLE_KWARGS)
         except:
             lakename = input('Not able to reach CCI Lakes webtable, '
                              f'please enter the name for ID{lakeid} manually: ')
@@ -381,6 +382,108 @@ def extract_lake_subset(lakeid: int = None, lakename: str = None, use_opendap: b
 
     return fn_output
 
+
+def extract_lake_subset_esa_climate(lakeid: int = None, lakename: str = None, 
+                        variables: list = c.DEFAULT_VARS, data_id: str = c.CCI_DATA_NAME,
+                        startdate: str = c.DEFAULT_START, enddate: str = c.DEFAULT_END,
+                        compress: bool = True, complevel: int = 4, verbose: bool = False, 
+                        temp: bool = False, merge_with_lakes: list = []):
+    """Take lakeid or lakename and extract corresponding lake and specified variables from ESA CCI datastore.
+    
+    Parameters
+    ----------
+    lakeid : int
+        CCI lake id of lake to extract
+    lakename : str
+        CCI lake name of lake to extract
+    variables : list
+        Variables to extract
+    startdate : str
+        Startdate of the timeseries to extract in the form (YYYY-MM-DD)
+    enddate : str
+        Enddate of the timeseries to extract in the form (YYYY-MM-DD)
+    compress : bool
+        Apply z-lib compression
+    complevel : int
+        Compression level to use
+    verbose : bool
+        Print status updates to console
+    temp : bool
+        Put inside temporary folder
+    merge_with_lakes : list
+        List with additional lakeids to merge with the provided lakeid
+    Returns
+    -------
+    str
+        Filename of the extracted subset
+    """
+    from xcube.core.store import new_data_store
+    from esa_climate_toolbox.core import get_op
+    from esa_climate_toolbox.core import list_ecv_datasets
+    from esa_climate_toolbox.core import get_store
+    from esa_climate_toolbox.core import list_datasets
+    from esa_climate_toolbox.ops import plot
+
+
+    # Input checks
+    if not (bool(lakeid) or bool(lakename)):
+        raise ValueError('At least one of the params lakeid and lakename '
+                         'should be passed!')
+    elif not lakename:
+        lakename = find_lakename(lakeid)
+    else:
+        lakeid = find_lakeid(lakename)
+
+    if not valid_variables(variables):
+        raise ValueError('The passed variable-list is invalid!')
+
+        
+    time_start = time()
+
+    if verbose:
+        print(f'Extracting {variables} for Lake {lakename} (ID{lakeid}) from '
+              f'{startdate} to {enddate} from ESA CCI DataStore...')
+
+
+    # Define output path
+    fn_varnames = get_shortname(variables)
+    fn_output = f'ID{lakeid}-{lakename.lower()}-{fn_varnames}-{startdate.replace("-", "")}' \
+        f'_{enddate.replace("-", "")}-v{c.VERSION}.extracted.nc'
+
+    if temp:
+        path_output = ROOT.joinpath(c.PATH_EXTRACTED).joinpath('temp').joinpath(fn_output)
+    else:
+        path_output = ROOT.joinpath(c.PATH_EXTRACTED).joinpath(fn_output)
+
+    path_output.parent.mkdir(parents=True, exist_ok=True)
+
+    # Create bbox from lakename or lakeID
+    ## Load lake metadata with shp files
+    path_shp = ROOT.joinpath(c.PATH_AUXILIARY).joinpath(c.FN_SHP)
+    meta_full_shp = gpd.read_file(path_shp)
+    ## Isolate lake(s) to extract
+    lakes_to_extract = [lakeid , *merge_with_lakes]
+    meta_shp = meta_full_shp.loc[meta_full_shp['id'].isin(lakes_to_extract)]
+    ## Grab rectangular bbox from around lakes
+    bbox = meta_shp.union_all().bounds
+
+    # Run extraction from ESA CCI datastore
+    lakes_ds = cci_store.open_data(
+            data_id=data_id,
+            variable_names=variables,
+            time_range=[startdate, enddate],
+            bbox = bbox
+    )
+
+    # Save xr output as .nc
+
+    time_elapsed = time() - time_start
+    
+    if verbose:
+        print(f'Finished extraction and masking after {time_elapsed:0.2f} seconds.')
+
+    return fn_output
+
 def log(str, indent=0):
     out = datetime.now().strftime("%H:%M:%S.%f") + (" " * 3 * (indent + 1)) + str
     with open("log.txt", "a") as file:
@@ -395,15 +498,24 @@ def data_extraction(id_and_settings):
     log("Processing id: {}".format(id))
     
     try:
-        fns_ext = extract_lake_subset(lakeid=int(id),
-                                      use_opendap=settings['use_opendap'], 
-                                      variables=settings['variables'],
-                                      startdate=settings['startdate'], 
-                                      enddate=settings['enddate'],
-                                      compress=settings['compress'], 
-                                      complevel=settings['complevel'], 
-                                      verbose=settings['verbose'])
-    
+        if settings['use_esacci']:
+            fns_ext = extract_lake_subset(lakeid=int(id), 
+                                        variables=settings['variables'],
+                                        startdate=settings['startdate'], 
+                                        enddate=settings['enddate'],
+                                        compress=settings['compress'], 
+                                        complevel=settings['complevel'], 
+                                        verbose=settings['verbose'])
+        else:    
+            fns_ext = extract_lake_subset(lakeid=int(id),
+                                        use_opendap=settings['use_opendap'], 
+                                        variables=settings['variables'],
+                                        startdate=settings['startdate'], 
+                                        enddate=settings['enddate'],
+                                        compress=settings['compress'], 
+                                        complevel=settings['complevel'], 
+                                        verbose=settings['verbose'])
+        
     except:
         log("Failed to process id: {}".format(id), indent=1)
         
