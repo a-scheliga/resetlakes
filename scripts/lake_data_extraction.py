@@ -21,7 +21,7 @@ settings = {'variables': ['lake_surface_water_temperature',
                           'lswt_quality_level',
                           'lake_ice_cover_class'], # (list) Variables to extract
             'use_opendap': False,      # (boolean) Download data using oPeNDAP (slow, up to 2sec per day)
-            'startdate': '2018-09-26', # (string) Startdate of the timeseries in the form (YYYY-MM-DD)
+            'startdate': '2019-09-26', # (string) Startdate of the timeseries in the form (YYYY-MM-DD)
             'enddate': '2020-09-01',   # (string) Enddate of the timeseries in the form (YYYY-MM-DD)
             'compress': True,          # (boolean) Apply z-lib compression
             'complevel': 4,            # (int) Compression level to use
