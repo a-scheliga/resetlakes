@@ -13,7 +13,7 @@ from codebase.lakecci_functions import data_extraction, find_lakeid
 #lakeids = list(lakescci_lut.id)
 
 # (OR) Extract specific lakes by names
-lakenames = ['Michigan']
+lakenames = ['Toledo Bend']
 lakeids = [find_lakeid(lakename) for lakename in lakenames]
 
 # Set extraction settings
