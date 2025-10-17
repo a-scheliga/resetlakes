@@ -13,7 +13,7 @@ DEFAULT_START = '1992-09-26'
 DEFAULT_END = '2020-12-31'
 
 VERSION = '2.1.0'
-CCI_DATA_NAME = data_id = 'esacci.LAKES.day.L3S.LK_PRODUCTS.multi-sensor.multi-platform.MERGED.v2-1-0.r1'
+CCI_DATA_NAME = 'esacci.LAKES.day.L3S.LK_PRODUCTS.multi-sensor.multi-platform.MERGED.v2-1-0.r1'
 
 PATH_RAW = 'data/raw'
 PATH_EXTRACTED = 'data/extracted'
