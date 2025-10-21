@@ -17,11 +17,9 @@ lakenames = ['Toledo Bend']
 lakeids = [find_lakeid(lakename) for lakename in lakenames]
 
 # Set extraction settings
-settings = {'variables': ['lake_surface_water_temperature',
-                          'lswt_quality_level',
-                          'lake_ice_cover_class'], # (list) Variables to extract
+settings = {'variables': ["lake_ice_cover_class","lake_ice_cover_flag","lake_ice_cover_uncertainty","lake_surface_water_temperature","lswt_uncertainty","lswt_quality_level","water_surface_height_above_reference_datum","lwl_uncertainty","lwl_quality_flag","lake_surface_water_extent","lwe_uncertainty","lwe_quality_flag"], # (list) Variables to extract
             'use_opendap': False,      # (boolean) Download data using oPeNDAP (slow, up to 2sec per day)
-            'startdate': '2019-08-25', # (string) Startdate of the timeseries in the form (YYYY-MM-DD)
+            'startdate': '2018-08-25', # (string) Startdate of the timeseries in the form (YYYY-MM-DD)
             'enddate': '2020-09-01',   # (string) Enddate of the timeseries in the form (YYYY-MM-DD)
             'compress': True,          # (boolean) Apply z-lib compression
             'complevel': 4,            # (int) Compression level to use
@@ -29,19 +27,21 @@ settings = {'variables': ['lake_surface_water_temperature',
             'use_esacci':True,         # (boolean) Download data using esa_climate toolbox
             }
 
+data_extraction((lakeids[0], settings))
+
 # Multiprocessing settings
 n_processes = 1
 
-# Main (run extraction)
-if __name__ == '__main__':
+# # Main (run extraction)
+# if __name__ == '__main__':
 
-    if settings['use_opendap']:
-        print(f'Start extracting {len(lakeids)} lakes using oPeNDAP (slow)..')
-    elif settings['use_esacci']:
-        print(f'Start extracting {len(lakeids)} lakes from ESA CCI Data Store..')
-    else:
-        print(f'Start extracting {len(lakeids)} lakes from local dataset..')
+#     if settings['use_opendap']:
+#         print(f'Start extracting {len(lakeids)} lakes using oPeNDAP (slow)..')
+#     elif settings['use_esacci']:
+#         print(f'Start extracting {len(lakeids)} lakes from ESA CCI Data Store..')
+#     else:
+#         print(f'Start extracting {len(lakeids)} lakes from local dataset..')
     
-    # Run extraction in multiprocessing pool
-    with Pool(processes=n_processes) as p:
-        outputs = p.map(data_extraction, map(lambda id: (id, settings), lakeids))
+#     # Run extraction in multiprocessing pool
+#     with Pool(processes=n_processes) as p:
+#         outputs = p.map(data_extraction, map(lambda id: (id, settings), lakeids))
