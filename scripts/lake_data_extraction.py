@@ -12,12 +12,19 @@ from codebase.lakecci_functions import data_extraction, find_lakeid
 #lakescci_lut = pd.read_csv('data/auxiliary/lakescci_v2.0.2_data-availability.csv')
 #lakeids = list(lakescci_lut.id)
 
+# # Common sets of variables
+lswt_vars = ["lake_surface_water_temperature","lswt_uncertainty","lswt_quality_level"]
+wq_vars = ["chla_mean", "chla_uncertainty", "turbidity_mean", "turbidity_uncertainty"] 
+lic_vars = ["lake_ice_cover_class", "lake_ice_cover_flag", "lake_ice_cover_uncertainty"]
+lwl_vars = ["water_surface_height_above_reference_datum", "lwl_uncertainty", "lwl_quality_flag"] 
+lswe_vars = ["lake_surface_water_extent", "lwe_uncertainty", "lwe_quality_flag"]
+
 # (OR) Extract specific lakes by names
-lakenames = ['Toledo Bend']
+lakenames = ['Great Bear']
 lakeids = [find_lakeid(lakename) for lakename in lakenames]
 
 # Set extraction settings
-settings = {'variables': ["lake_ice_cover_class","lake_ice_cover_flag","lake_ice_cover_uncertainty","lake_surface_water_temperature","lswt_uncertainty","lswt_quality_level","water_surface_height_above_reference_datum","lwl_uncertainty","lwl_quality_flag","lake_surface_water_extent","lwe_uncertainty","lwe_quality_flag"], # (list) Variables to extract
+settings = {'variables':lswt_vars, # (list) Variables to extract
             'use_opendap': False,      # (boolean) Download data using oPeNDAP (slow, up to 2sec per day)
             'startdate': '2018-08-25', # (string) Startdate of the timeseries in the form (YYYY-MM-DD)
             'enddate': '2020-09-01',   # (string) Enddate of the timeseries in the form (YYYY-MM-DD)
