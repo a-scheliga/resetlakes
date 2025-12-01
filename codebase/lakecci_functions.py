@@ -470,11 +470,14 @@ def extract_lake_subset_esa_climate(lakeid: int = None, lakename: str = None,
             bbox = bbox
     )
 
-    lakes_ds.attrs['history'] = list(lakes_ds.attrs['history'][0])
-    print(lakes_ds.attrs['history'])
-    print(type(lakes_ds.attrs))
+    lakes_ds.attrs['history'] = list(lakes_ds.attrs['history'][0]) # handles a b'history datatype error that occurs periodically.
+
+    # Create compression dictionary for writing
+    comp = dict(zlib=compress, complevel=complevel)
+    encoding = {var: comp for var in lakes_ds.data_vars}
+
     # Save xr output as .nc
-    lakes_ds.to_netcdf(path_output)
+    lakes_ds.to_netcdf(path_output,encoding = encoding)
 
     time_elapsed = time() - time_start
     
